@@ -1,37 +1,73 @@
 ﻿using System;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
+using System.Collections.Generic;
+using System.Linq;
 using Fitness.BL.Model;
 
 namespace Fitness.BL.Controller
 {
-    public class UserController
+    public class UserController : ControllerBase
     {
-        public User User { get; }
-        public UserController(string userName, string genderName, DateTime birthDate, double weight, double height)
+        private const string USERS_FILE_NAME = "users.dat";
+        public List<User> Users { get; }
+        public User CurrentUser { get; }
+        public bool IsNewUser { get; } = false;
+
+        public UserController(string userName)
         {
-            var gender = new Gender(genderName);
-            var user = new User(userName, gender, birthDate, weight, height);
-            User = user;
+            if (string.IsNullOrWhiteSpace(userName))
+            {
+                throw new ArgumentNullException("Имя пользователя не может быть пустым.", nameof(userName));
+            }
+            Users = GetUsersData();
+            foreach (var user in Users)
+            {
+                
+                Console.WriteLine(user.Name);
+            }
+
+            CurrentUser = Users.SingleOrDefault(u => u.Name == userName);  
+            if(CurrentUser == null)
+            {
+                CurrentUser = new User(userName);
+                Users.Add(CurrentUser);
+                IsNewUser = true;
+                Save();
+            }
+        }
+
+        public void SetUserData(string genderName, DateTime bithDate, double weight = 1, double height = 1)
+        {
+            #region проверка
+            if (string.IsNullOrWhiteSpace(genderName))
+            {
+                throw new ArgumentNullException("Гендер не может быть пустым или null.", nameof(genderName));
+            }
+            if(bithDate >= DateTime.Now)
+            {
+                throw new ArgumentException("Дата рождения не может быть больше текущей.", nameof(bithDate));
+            }
+            if(weight <= 0)
+            {
+                throw new ArgumentException("Масса тела не может быть меньше либо равно 0.", nameof(weight));
+            }
+            if(height <= 0)
+            {
+                throw new ArgumentException("Рост не может быть меньше либо равен 0.", nameof(height));
+            }
+            #endregion
+            CurrentUser.Gender = new Gender(genderName);
+            CurrentUser.BirthDate = bithDate;
+            CurrentUser.Weight = weight;
+            CurrentUser.Height = height;
         }
         public void Save()
         {
-            var formatter = new BinaryFormatter();
-            using (var fs = new FileStream("users.dat", FileMode.OpenOrCreate))
-            {
-                formatter.Serialize(fs, User);
-            }
+            Save(USERS_FILE_NAME, Users);
         }
-        public UserController()
+
+        public List<User> GetUsersData()
         {
-            var formatter = new BinaryFormatter();
-            using (var fs = new FileStream("users.dat", FileMode.OpenOrCreate))
-            {
-                if(formatter.Deserialize(fs) is User user)
-                {
-                    User = user;
-                }
-            }
+            return Load<List<User>>(USERS_FILE_NAME) ?? new List<User>();
         }
     }
 }

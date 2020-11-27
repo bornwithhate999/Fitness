@@ -1,6 +1,6 @@
 ﻿using System;
 using Fitness.BL.Controller;
-
+using Fitness.BL.Model;
 
 namespace Fitness.CMD
 {
@@ -8,25 +8,102 @@ namespace Fitness.CMD
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Вас приветствует приложение Fitness");
+            Console.WriteLine("Вас приветствует приложение Fitness.");
 
-            Console.WriteLine("Введите имя пользователя:");
+            Console.Write("Введите имя пользователя: ");
             var name = Console.ReadLine();
 
-            Console.WriteLine("Введите пол:");
-            var gender = Console.ReadLine();
+            
 
-            Console.WriteLine("Введите дату рождения:");
-            var birthDate = DateTime.Parse(Console.ReadLine());
+            var userController = new UserController(name);
+            var eatingController = new EatingContoller(userController.CurrentUser);
+            if (userController.IsNewUser)
+            {
+                Console.Write("Введите пол: ");
+                var gender = Console.ReadLine();
 
-            Console.WriteLine("Введите вес:");
-            var weight = Double.Parse(Console.ReadLine());
+                DateTime birthDate = ParseDatetime();
+                double weight = ParseDouble("вес");
+                double height = ParseDouble("рост");
 
-            Console.WriteLine("Введите рост:");
-            var height = Double.Parse(Console.ReadLine());
+                userController.SetUserData(gender, birthDate, weight, height);
+            }
 
-            var userController = new UserController(name, gender, birthDate, weight, height);
-            userController.Save();
+            Console.WriteLine(userController.CurrentUser);
+
+            Console.WriteLine("Что вы хотите сделать?");
+            Console.WriteLine("E - ввести приём пищи.");
+
+            var key = Console.ReadKey();
+            if(key.Key == ConsoleKey.E)
+            {
+                var portion = EnterEating();
+                eatingController.Add(portion.Food, portion.Weight);
+
+                foreach(var item in eatingController.Eating.Portions)
+                {
+                    Console.WriteLine(item);
+                }
+            }
+            Console.ReadLine();
+        }
+
+        private static (Food Food, double Weight) EnterEating()
+        {
+
+            var food = GetFood();
+
+            var weight = ParseDouble("вес порции");
+
+            return (food, weight);
+        }
+
+        private static Food GetFood()
+        {
+            Console.Write("Введите имя продукта: ");
+            var foodName = Console.ReadLine();
+
+            var foodCallories = ParseDouble("калории");
+
+            var foodProteins = ParseDouble("белок");
+
+            var foodFats = ParseDouble("жиры"); ;
+
+            var foodCarbohydrates = ParseDouble("угдеводы");
+
+            return new Food(foodName, foodCallories, foodProteins, foodFats, foodCarbohydrates);
+        }
+
+        private static DateTime ParseDatetime()
+        {
+            while (true)
+            {
+                Console.Write("Введите дату рождения:");
+                if (DateTime.TryParse(Console.ReadLine(), out DateTime value))
+                {
+                    return value;
+                }
+                else
+                {
+                    Console.WriteLine("Неверный формат даты рождения.");
+                }
+            }
+        }
+
+        private static double ParseDouble(string name) 
+        {
+            while (true)
+            {
+                Console.Write($"Введите {name}: ");
+                if (double.TryParse(Console.ReadLine(), out double value))
+                {
+                    return value;
+                }
+                else
+                {
+                    Console.WriteLine($"Неверный формат поля {name}.");
+                }
+            }
         }
     }
 }
