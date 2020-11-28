@@ -9,7 +9,7 @@ namespace Fitness.BL.Controller
         {
             var formatter = new BinaryFormatter();
 
-            using(var fs = new FileStream(fileName, FileMode.OpenOrCreate))
+            using (var fs = new FileStream(fileName, FileMode.OpenOrCreate))
             {
                 formatter.Serialize(fs, item);
             }

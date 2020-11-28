@@ -19,11 +19,6 @@ namespace Fitness.BL.Controller
                 throw new ArgumentNullException("Имя пользователя не может быть пустым.", nameof(userName));
             }
             Users = GetUsersData();
-            foreach (var user in Users)
-            {
-                
-                Console.WriteLine(user.Name);
-            }
 
             CurrentUser = Users.SingleOrDefault(u => u.Name == userName);  
             if(CurrentUser == null)

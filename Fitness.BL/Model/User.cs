@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fitness.BL.Model
 {
@@ -17,6 +13,7 @@ namespace Fitness.BL.Model
         public double Height { get; set; }
         public int Age { get { return DateTime.Now.Year - BirthDate.Year; } }
         #endregion 
+
         public User(string name,
                     Gender gender,
                     DateTime birthDate,
@@ -62,7 +59,7 @@ namespace Fitness.BL.Model
 
         public override string ToString()
         {
-            return this.Name + " " + Age + " гр.";
+            return this.Name + " " + Age + " лет.";
         } 
     }    
 }

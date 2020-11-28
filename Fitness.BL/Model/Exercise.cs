@@ -16,11 +16,19 @@ namespace Fitness.BL.Model
 
         public Exercise(DateTime start, DateTime finish, Activity activity, User user)
         {
-            // TODO: Проверка аргументов
+            if(finish < start)
+            {
+                throw new ArgumentException($"Дата окончания не может быть мешьше начала: {start}", nameof(finish));
+            }
             Start = start;
             Finish = finish;
             Activity = activity;
-            User = user;
+            User = user ?? throw new ArgumentNullException("Пользователь не может быть null", nameof(user));
+        }
+
+        public override string ToString()
+        {
+            return $"{Activity.Name} c {Start} до {Finish}";
         }
     }
 }
